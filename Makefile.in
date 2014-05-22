@@ -1,0 +1,25 @@
+RELEASE=@release@
+CMAKE_OPTION=@cmake_option@
+CMAKE=cmake
+CORES=@cores@
+CMAKE_PATH=@cmake_path@
+
+all: $(RELEASE)/Makefile
+	$(MAKE) -C $(RELEASE) -j$(CORES)
+
+install:
+	$(MAKE) -C $(RELEASE) install
+
+$(RELEASE)/Makefile: $(RELEASE)
+	cd $(RELEASE); $(CMAKE) $(CMAKE_PATH) $(CMAKE_OPTION)
+
+$(RELEASE):
+	mkdir -p $(RELEASE)
+
+clean:
+	$(MAKE) -C $(RELEASE) $@ -j$(CORES)
+
+distclean:
+	rm -rf $(RELEASE)
+	rm -f Makefile
+	find . -name "*~" -exec rm {} \;

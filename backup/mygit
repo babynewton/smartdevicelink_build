@@ -1,0 +1,24 @@
+#!/bin/bash
+
+GENIVI=git://git.projects.genivi.org/smartdevicelink.git
+GENIVI_ANDROID=git://git.projects.genivi.org/smartdevicelink_android.git
+GITHUB=https://github.com/babynewton/smartdevicelink.git
+
+DIRS="master release_1.0"
+
+for DIR in $DIRS
+do
+	if [ ! -d "../$DIR" ]
+	then
+		pushd ../
+		git clone $GENIVI -b $DIR $DIR
+		cd $DIR
+		git remote add github $GITHUB
+		popd
+	else
+		cd ../$DIR 
+		git pull origin -b $DIR
+		git pull github -b $DIR
+		cd -
+	fi	
+done

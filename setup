@@ -1,0 +1,35 @@
+#!/usr/bin/env python
+import os
+
+genivi="git://git.projects.genivi.org/"
+github="https://github.com/babynewton/smartdevicelink/"
+giturls = []
+giturls.append({"genivi_url":genivi+"smartdevicelink.git",
+		"github_url":github+"smartdevicelink", 
+		"branch":"master",
+		"path":"../core"})
+giturls.append({"genivi_url":genivi+"smartdevicelink.git",
+		"github_url":github+"smartdevicelink",
+		"branch":"release_1.0",
+		"path":"../core_r1"})
+giturls.append({"genivi_url":genivi+"smartdevicelink_android.git",
+		"github_url":github+"smartdevicelink_android",
+		"branch":"master",
+		"path":"../android"})
+giturls.append({"genivi_url":genivi+"smartdevicelink_tester_android.git",
+		"github_url":github+"smartdevicelink_tester_android",
+		"branch":"master",
+		"path":"../tester_android"})
+
+for x in giturls:
+	if os.path.exists(x["path"]):
+		owd=os.getcwd()
+		os.chdir(x["path"])
+		cmd='git pull origin ' + x["branch"]
+		os.system(cmd)
+		os.chdir(owd)
+	else:
+		cmd='git clone ' + x["genivi_url"] + ' -b ' + x["branch"] + ' ' + x["path"]
+		os.system(cmd)
+		cmd='git remote add github ' + x["github_url"]
+		os.system(cmd)

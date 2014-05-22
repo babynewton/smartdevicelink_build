@@ -1,0 +1,90 @@
+#!/usr/bin/env python
+import os
+import sys
+import re
+import multiprocessing
+
+cmakelist='CMakeLists.txt'
+
+class cl_base:
+	def cmake_arg_shared(self, shared):
+		return {True:" -DBUILD_SHARED_LIBS=ON",False:""}[shared]
+
+class cl_core(cl_base):
+	def cmake_arg_qt(self, qt):
+		return {True:" -DHMI2=ON",False:""}[qt]
+
+	def cmake_arg_debug(self, debug):
+		return {True:" -DCMAKE_C_FLAGS_DEBUG", False:""}[debug]
+
+class cl_core_r1(cl_base):
+	def cmake_arg_qt(self, qt):
+		if qt == True: raise Exception("Qt is not available in core_r1")
+		return ""
+
+	def cmake_arg_debug(self, debug):
+		if debug == True: raise Exception("Debug has not been supported in core_r1")
+		return ""
+
+def show_help():
+	print('configure by Newton Kim, Copyleft from 2014')
+	print('USAGE: ./configure target options')
+	print('target:')
+	for subdir in os.listdir('../'):
+		if os.path.exists('../' + subdir + '/' + cmakelist):
+			print('    ' + subdir)
+		elif os.path.exists('../' + subdir + '/SDL_Core/' + cmakelist):
+			print('    ' + subdir)
+		else: continue
+		
+	print('option:')
+	print('    -g, --debug    enables debugging information')
+	print('    -a, --all      enables all features')
+	print('    -s, --with-shared  builds libraries as shared objects')
+	print('    -q, --with-qt  enables QT UI(only for releas 3.0)')
+	print('    -h, --help     shows this help screeen')
+	
+
+other_options=re.compile('-[.]*')
+
+qt_flag=False
+debug_flag=False
+shared_flag=False
+for arg in sys.argv[1:]:
+	if arg == '-h' or arg == '--help':
+		show_help()
+		exit(0)
+	elif arg == '-q' or arg == '--with-qt':
+		qt_flag=True
+	elif arg == '-g' or arg == '--debug':
+		debug_flag=True
+	elif arg == '-s' or arg == '--with-shared':
+		shared_flag=True
+	elif other_options.match(arg):
+		print('Invalid argument ' + arg)
+		exit(1)
+	else:
+		if os.path.exists('../'+arg+'/'+cmakelist):
+			cmake_path='../../'+arg
+		elif os.path.exists('../'+arg+'/SDL_Core/'+cmakelist):
+			cmake_path='../../'+arg+'/SDL_Core'
+		else:
+			print(cmakelist + " doesn't exist")
+			exit(1)
+		target = arg
+		if target == 'core': target_class=cl_core()
+		elif target == 'core_r1': target_class=cl_core_r1()
+
+cmake_args=target_class.cmake_arg_qt(qt_flag)
+cmake_args+=target_class.cmake_arg_debug(debug_flag)
+cmake_args+=target_class.cmake_arg_shared(shared_flag)
+
+with open('Makefile.in') as rfd:
+	rstr=rfd.read()
+	rstr = rstr.replace("@release@", target)
+	rstr = rstr.replace("@cores@", str(multiprocessing.cpu_count()))
+	rstr = rstr.replace("@cmake_path@", cmake_path)
+	rstr = rstr.replace("@cmake_option@", cmake_args)
+	with open('Makefile', 'w') as wfd:
+		wfd.write(rstr)
+
