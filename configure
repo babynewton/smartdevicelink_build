@@ -3,12 +3,33 @@ import os
 import sys
 import re
 import multiprocessing
+import subprocess
 
 cmakelist='CMakeLists.txt'
 
 class cl_base:
 	def cmake_arg_shared(self, shared):
 		return {True:" -DBUILD_SHARED_LIBS=ON",False:""}[shared]
+
+	def check_and_install(self, app):
+		not subprocess.call(['which', app]) or os.system('sudo apt-get install ' + app)
+
+	def check_dir_and_install(self, directory, app):
+		os.path.exists(directory) or os.system('sudo apt-get install ' + app)
+
+	def check_pkg_and_install(self, pkg, app):
+		not subprocess.call(['pkg-config', '--exists', pkg]) or os.system('sudo apt-get install ' + app)
+
+	def setup_common(self):
+		self.check_and_install('gcc')
+		self.check_and_install('g++')
+		self.check_and_install('cmake')
+		self.check_and_install('chromium-browser')
+		self.check_and_install('openssl')
+		self.check_and_install('doxygen')
+		self.check_dir_and_install('/usr/share/graphviz', 'graphviz')
+		self.check_dir_and_install('/usr/include/openssl', 'libssl-dev')
+		self.check_dir_and_install('/usr/include/bluetooth', 'libbluetooth-dev')
 
 class cl_core(cl_base):
 	def cmake_arg_qt(self, qt):
@@ -17,6 +38,28 @@ class cl_core(cl_base):
 	def cmake_arg_debug(self, debug):
 		return {True:" -DCMAKE_C_FLAGS_DEBUG", False:""}[debug]
 
+	def cmake_arg_media(self, media):
+		return {True:" -DEXTENDED_MEDIA_MODE=ON", False:""}[media]
+
+	def cmake_arg_bluetooth(self, bt):
+		return {True:" -DBUILD_BT_SUPPORT=ON", False:""}[bt]
+
+	def cmake_arg_avahi(self, avahi):
+		return {True:" -DBUILD_AVAHI_SUPPORT=ON", False:""}[avahi]
+
+	def cmake_arg_rwlock(self, rwlock):
+		return {True:" -DBUILD_RWLOCK_SUPPORT=ON", False:""}[rwlock]
+
+	def cmake_arg_backtrace(self, backtrace):
+		return {True:" -DBACKTRACE_SUPPORT=ON", False:""}[backtrace]
+
+	def setup(self):
+		parent=cl_base()
+		parent.setup_common()
+		parent.check_and_install('mscgen')
+		parent.check_dir_and_install('/usr/include/log4cxx', 'liblog4cxx-dev')
+		parent.check_pkg_and_install('dbus-1', 'libdbus-1-dev')
+
 class cl_core_r1(cl_base):
 	def cmake_arg_qt(self, qt):
 		if qt == True: raise Exception("Qt is not available in core_r1")
@@ -24,6 +67,29 @@ class cl_core_r1(cl_base):
 
 	def cmake_arg_debug(self, debug):
 		if debug == True: raise Exception("Debug has not been supported in core_r1")
+		return ""
+
+	def setup(self):
+		cl_base().setup_common()
+
+	def cmake_arg_media(self, media):
+		if media == True: raise Exception("Media has not been supported in core_r1")
+		return ""
+
+	def cmake_arg_bluetooth(self, bt):
+		if bt == True: raise Exception("Bluetooth has not been supported in core_r1")
+		return ""
+
+	def cmake_arg_avahi(self, avahi):
+		if avahi == True: raise Exception("Avahi has not been supported in core_r1")
+		return ""
+
+	def cmake_arg_rwlock(self, rwlock):
+		if rwlock == True: raise Exception("RW Lock has not been supported in core_r1")
+		return ""
+
+	def cmake_arg_backtrace(self, backtrace):
+		if backtrace == True: raise Exception("Back-trace has not been supported in core_r1")
 		return ""
 
 def show_help():
@@ -38,28 +104,51 @@ def show_help():
 		else: continue
 		
 	print('option:')
-	print('    -g, --debug    enables debugging information')
-	print('    -a, --all      enables all features')
-	print('    -s, --with-shared  builds libraries as shared objects')
-	print('    -q, --with-qt  enables QT UI(only for releas 3.0)')
-	print('    -h, --help     shows this help screeen')
+	print('    -a, --all              enables all features')
+	print('    -h, --help             shows this help screeen')
+	print('option for release 3.0:')
+	print('    -g, --debug            enables debugging information')
+	print('    -s, --with-shared      builds libraries as shared objects')
+	print('    -m, --with-media       enables media')
+	print('    -b, --with-bluetooth   enables bluetooth')
+	print('    -d, --with-avahi       enables avahi mDNS')
+	print('    -l, --with-rwlock      enables R/W lock')
+	print('    -t, --with-back-trace  enables backtracing')
+	print('    -q, --with-qt          enables QT UI')
 	
 
 other_options=re.compile('-[.]*')
 
-qt_flag=False
 debug_flag=False
 shared_flag=False
+media_flag=False
+bluetooth_flag=False
+avahi_flag=False
+rwlock_flag=False
+backtrace_flag=False
+qt_flag=False
+
 for arg in sys.argv[1:]:
+	if arg == '-a' or arg == '--all':
+		debug_flag=True
+		shared_flag=True
+		media_flag=True
+		bluetooth_flag=True
+		avahi_flag=True
+		rwlock_flag=True
+		backtrace_flag=True
+		qt_flag=True
 	if arg == '-h' or arg == '--help':
 		show_help()
 		exit(0)
-	elif arg == '-q' or arg == '--with-qt':
-		qt_flag=True
-	elif arg == '-g' or arg == '--debug':
-		debug_flag=True
-	elif arg == '-s' or arg == '--with-shared':
-		shared_flag=True
+	elif arg == '-q' or arg == '--with-qt': qt_flag=True
+	elif arg == '-g' or arg == '--debug': debug_flag=True
+	elif arg == '-s' or arg == '--with-shared': shared_flag=True
+	elif arg == '-m' or arg == '--with-media': media_flag=True
+	elif arg == '-b' or arg == '--with-bluetooth': bluetooth_flag=True
+	elif arg == '-d' or arg == '--with-avahi': avahi_flag=True
+	elif arg == '-l' or arg == '--with-rwlock': rwlock_flag=True
+	elif arg == '-t' or arg == '--with-back-trace': backtrace_flag=True
 	elif other_options.match(arg):
 		print('Invalid argument ' + arg)
 		exit(1)
@@ -75,9 +164,15 @@ for arg in sys.argv[1:]:
 		if target == 'core': target_class=cl_core()
 		elif target == 'core_r1': target_class=cl_core_r1()
 
+target_class.setup()
 cmake_args=target_class.cmake_arg_qt(qt_flag)
 cmake_args+=target_class.cmake_arg_debug(debug_flag)
 cmake_args+=target_class.cmake_arg_shared(shared_flag)
+cmake_args+=target_class.cmake_arg_media(media_flag)
+cmake_args+=target_class.cmake_arg_bluetooth(bluetooth_flag)
+cmake_args+=target_class.cmake_arg_avahi(avahi_flag)
+cmake_args+=target_class.cmake_arg_rwlock(rwlock_flag)
+cmake_args+=target_class.cmake_arg_backtrace(backtrace_flag)
 
 with open('Makefile.in') as rfd:
 	rstr=rfd.read()
