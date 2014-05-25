@@ -9,6 +9,7 @@ all: $(RELEASE)/Makefile
 
 install:
 	$(MAKE) -C $(RELEASE) install
+	cp sdld $(RELEASE)/bin
 
 $(RELEASE)/Makefile: $(RELEASE)
 	cd $(RELEASE); $(CMAKE) $(CMAKE_PATH) $(CMAKE_OPTION)
