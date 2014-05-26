@@ -4,8 +4,8 @@ CMAKE=cmake
 CORES=@cores@
 CMAKE_PATH=@cmake_path@
 
-all: $(RELEASE)/Makefile
-	$(MAKE) -C $(RELEASE) -j$(CORES)
+all doxygen: $(RELEASE)/Makefile
+	$(MAKE) -C $(RELEASE) $@ -j$(CORES)
 
 install:
 	$(MAKE) -C $(RELEASE) install
