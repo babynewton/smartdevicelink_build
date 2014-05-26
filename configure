@@ -11,6 +11,9 @@ class cl_base:
 	def cmake_arg_shared(self, shared):
 		return {True:" -DBUILD_SHARED_LIBS=ON",False:""}[shared]
 
+	def cmake_arg_debug(self, debug):
+		return {True:" -DCMAKE_C_FLAGS_DEBUG=ON", False:""}[debug]
+
 	def check_and_install(self, app):
 		not subprocess.call(['which', app]) or os.system('sudo apt-get install ' + app)
 
@@ -34,9 +37,6 @@ class cl_base:
 class cl_core(cl_base):
 	def cmake_arg_qt(self, qt):
 		return {True:" -DHMI2=ON",False:""}[qt]
-
-	def cmake_arg_debug(self, debug):
-		return {True:" -DCMAKE_C_FLAGS_DEBUG", False:""}[debug]
 
 	def cmake_arg_media(self, media):
 		return {True:" -DEXTENDED_MEDIA_MODE=ON", False:""}[media]
@@ -63,10 +63,6 @@ class cl_core(cl_base):
 class cl_core_r1(cl_base):
 	def cmake_arg_qt(self, qt):
 		if qt == True: raise Exception("Qt is not available in core_r1")
-		return ""
-
-	def cmake_arg_debug(self, debug):
-		if debug == True: raise Exception("Debug has not been supported in core_r1")
 		return ""
 
 	def setup(self):
@@ -106,8 +102,8 @@ def show_help():
 	print('option:')
 	print('    -a, --all              enables all features')
 	print('    -h, --help             shows this help screeen')
-	print('option for release 3.0:')
 	print('    -g, --debug            enables debugging information')
+	print('option for release 3.0 only:')
 	print('    -s, --with-shared      builds libraries as shared objects')
 	print('    -m, --with-media       enables media')
 	print('    -b, --with-bluetooth   enables bluetooth')
