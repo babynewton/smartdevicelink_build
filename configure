@@ -9,14 +9,24 @@ import urllib
 cmakelist='CMakeLists.txt'
 
 class cl_base:
-	def os_version(self):
+	def lsb_code(self,directive):
 		lsb_release='/etc/lsb-release'
-		version_filter=re.compile('DISTRIB_RELEASE=(.*)')
+		version_filter=re.compile(directive+'=(.*)')
 		with open(lsb_release) as lsb:
 			for line in lsb.readlines():
 				match = version_filter.match(line)
 				if match and match.group(1): return match.group(1)
-		raise Exception('Invalid version')
+		raise Exception('Invalid information')
+
+	def os_version(self):
+		return self.lsb_code('DISTRIB_RELEASE')
+
+	def os_code(self):
+		return self.lsb_code('DISTRIB_CODENAME')
+
+	def os_name(self):
+		return self.lsb_code('DISTRIB_ID')
+
 	def cmake_arg_shared(self, shared):
 		return {True:" -DBUILD_SHARED_LIBS=ON",False:""}[shared]
 
@@ -71,10 +81,10 @@ class cl_core(cl_base):
 		if os_ver == "12.04" or os_ver == "12.10" or os_ver == "13.04":
 			parent.check_dir_and_install('/usr/include/log4cxx', 'liblog4cxx10-dev')
 			gstreamer_sdk_url='http://www.freedesktop.org/software/gstreamer-sdk/'
-			code_name=subprocess.call('grep DISTRIB_CODENAME /etc/lsb-release | sed "s/DISTRIB_CODENAME=//"', shell=True)
-			host_arch=subprocess.call(['dpkg-architecture', '-qDEB_HOST_ARCH'])
+			code_name=parent.os_code()
+			host_arch=subprocess.Popen(['dpkg-architecture', '-qDEB_HOST_ARCH'], stdout=subprocess.PIPE).communicate()[0].strip()
 			if not os.path.exists('/etc/apt/sources.list.d/gstreamer-sdk.list'):
-				urllib.urlretrieve(gstreamer_sdk_url+'data/packages/ubuntu/'+code_name+'/'+host_arch+'/gstreamer-sdk.list')
+				os.system('wget '+gstreamer_sdk_url+'data/packages/ubuntu/'+code_name+'/'+host_arch+'/gstreamer-sdk.list')
 				os.system('sudo mv gstreamer-sdk.list /etc/apt/sources.list.d')
 				os.system('wget -q -O - '+gstreamer_sdk_url+'sdk.pgp | sudo apt-key add -')
 				os.system('sudo apt-get update')
