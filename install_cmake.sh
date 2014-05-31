@@ -7,4 +7,5 @@ cd $CMAKE_DIRECTORY
 ./configure
 make
 sudo make install
+cd -
 rm -rf $CMAKE_DIRECTORY $CMAKE_ARCHIVE
