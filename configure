@@ -73,16 +73,17 @@ class cl_core(cl_base):
 		return {True:" -DBACKTRACE_SUPPORT=ON", False:""}[backtrace]
 
 	def install_gstreamer_sdk(self):
-		parent=cl_base()
-		gstreamer_sdk_url='http://www.freedesktop.org/software/gstreamer-sdk/'
-		code_name=parent.os_code()
-		host_arch=subprocess.Popen(['dpkg-architecture', '-qDEB_HOST_ARCH'], stdout=subprocess.PIPE).communicate()[0].strip()
-		if not os.path.exists('/etc/apt/sources.list.d/gstreamer-sdk.list'):
-			os.system('wget '+gstreamer_sdk_url+'data/packages/ubuntu/'+code_name+'/'+host_arch+'/gstreamer-sdk.list')
-			os.system('sudo mv gstreamer-sdk.list /etc/apt/sources.list.d')
-			os.system('wget -q -O - '+gstreamer_sdk_url+'sdk.pgp | sudo apt-key add -')
-			os.system('sudo apt-get update')
-		parent.check_dir_and_install('/opt/gstreamer-sdk', 'gstreamer-sdk-dev')
+#		parent=cl_base()
+#		gstreamer_sdk_url='http://www.freedesktop.org/software/gstreamer-sdk/'
+#		code_name=parent.os_code()
+#		host_arch=subprocess.Popen(['dpkg-architecture', '-qDEB_HOST_ARCH'], stdout=subprocess.PIPE).communicate()[0].strip()
+#		if not os.path.exists('/etc/apt/sources.list.d/gstreamer-sdk.list'):
+#			os.system('wget '+gstreamer_sdk_url+'data/packages/ubuntu/'+code_name+'/'+host_arch+'/gstreamer-sdk.list')
+#			os.system('sudo mv gstreamer-sdk.list /etc/apt/sources.list.d')
+#			os.system('wget -q -O - '+gstreamer_sdk_url+'sdk.pgp | sudo apt-key add -')
+#			os.system('sudo apt-get update')
+#		parent.check_dir_and_install('/opt/gstreamer-sdk', 'gstreamer-sdk-dev')
+		os.system('./gstreamer.sh')
 
 	def install_cmake(self):
 		if not os.path.exists('/usr/local/bin/cmake'): os.system('./install_cmake.sh')
