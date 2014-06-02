@@ -93,6 +93,7 @@ class cl_core(cl_base):
 		parent.setup_common()
 		parent.check_and_install('mscgen')
 		parent.check_pkg_and_install('dbus-1', 'libdbus-1-dev')
+		parent.check_pkg_and_install('libpulse', 'libpulse-dev')
 		os_ver=parent.os_version()
 		if os_ver == "12.04":
 			parent.check_dir_and_install('/usr/include/log4cxx', 'liblog4cxx10-dev')
@@ -203,10 +204,17 @@ for arg in sys.argv[1:]:
 			print(cmakelist + " doesn't exist")
 			exit(1)
 		target = arg
-		if target == 'core': target_class=cl_core()
-		elif target == 'core_r1': target_class=cl_core_r1()
+		if target == 'core':
+			target_class=cl_core()
+		elif target == 'core_r1':
+			target_class=cl_core_r1()
 
-target_class.setup()
+try:
+	target_class.setup()
+except:
+	print "Invalid target"
+	exit(1)
+
 cmake_args=target_class.cmake_arg_qt(qt_flag)
 cmake_args+=target_class.cmake_arg_debug(debug_flag)
 cmake_args+=target_class.cmake_arg_shared(shared_flag)
