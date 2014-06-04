@@ -204,7 +204,7 @@ for arg in sys.argv[1:]:
 			print(cmakelist + " doesn't exist")
 			exit(1)
 		target = arg
-		if target == 'core':
+		if target == 'core' or target == 'linux_jsoncpp':
 			target_class=cl_core()
 		elif target == 'core_r1':
 			target_class=cl_core_r1()

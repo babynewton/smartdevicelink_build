@@ -8,6 +8,9 @@ giturls.append({"genivi_url":genivi+"smartdevicelink.git",
 		"github_url":github+"smartdevicelink", 
 		"branch":"master",
 		"path":"../core"})
+giturls.append({"github_url":github+"smartdevicelink", 
+		"branch":"linux_jsoncpp",
+		"path":"../linux_jsoncpp"})
 giturls.append({"genivi_url":genivi+"smartdevicelink.git",
 		"github_url":github+"smartdevicelink",
 		"branch":"release_1.0",
@@ -26,14 +29,17 @@ for x in giturls:
 		owd=os.getcwd()
 		os.chdir(x["path"])
 		cmd='git pull origin ' + x["branch"]
-		cmd='git pull genivi ' + x["branch"]
 		os.system(cmd)
+		if 'genivi_url' in x:
+			cmd='git pull genivi ' + x["branch"]
+			os.system(cmd)
 		os.chdir(owd)
 	else:
 		cmd='git clone ' + x["github_url"] + ' -b ' + x["branch"] + ' ' + x["path"]
 		os.system(cmd)
-		owd=os.getcwd()
-		os.chdir(x["path"])
-		cmd='git remote add genivi ' + x["genivi_url"]
-		os.system(cmd)
-		os.chdir(owd)
+		if 'genivi_url' in x:
+			owd=os.getcwd()
+			os.chdir(x["path"])
+			cmd='git remote add genivi ' + x["genivi_url"]
+			os.system(cmd)
+			os.chdir(owd)
