@@ -60,6 +60,9 @@ class cl_core(cl_base):
 	def cmake_arg_media(self, media):
 		return {True:" -DEXTENDED_MEDIA_MODE=ON", False:""}[media]
 
+	def cmake_arg_usb(self, usb):
+		return {True:" -DBUILD_USB_SUPPORT=ON", False:""}[usb]
+
 	def cmake_arg_bluetooth(self, bt):
 		return {True:" -DBUILD_BT_SUPPORT=ON", False:""}[bt]
 
@@ -119,6 +122,10 @@ class cl_core_r1(cl_base):
 		if media == True: raise Exception("Media has not been supported in core_r1")
 		return ""
 
+	def cmake_arg_usb(self, usb):
+		if bt == True: raise Exception("USB has not been supported in core_r1")
+		return ""
+
 	def cmake_arg_bluetooth(self, bt):
 		if bt == True: raise Exception("Bluetooth has not been supported in core_r1")
 		return ""
@@ -153,6 +160,7 @@ def show_help():
 	print('option for release 3.0 only:')
 	print('    -s, --with-shared      builds libraries as shared objects')
 	print('    -m, --with-media       enables media')
+	print('    -u, --with-usb         enables usb')
 	print('    -b, --with-bluetooth   enables bluetooth')
 	print('    -d, --with-avahi       enables avahi mDNS')
 	print('    -l, --with-rwlock      enables R/W lock')
@@ -165,6 +173,7 @@ other_options=re.compile('-[.]*')
 debug_flag=False
 shared_flag=False
 media_flag=False
+usb_flag=False
 bluetooth_flag=False
 avahi_flag=False
 rwlock_flag=False
@@ -176,6 +185,7 @@ for arg in sys.argv[1:]:
 		debug_flag=True
 		shared_flag=True
 		media_flag=True
+		usb_flag=True
 		bluetooth_flag=True
 		avahi_flag=True
 		rwlock_flag=True
@@ -188,6 +198,7 @@ for arg in sys.argv[1:]:
 	elif arg == '-g' or arg == '--debug': debug_flag=True
 	elif arg == '-s' or arg == '--with-shared': shared_flag=True
 	elif arg == '-m' or arg == '--with-media': media_flag=True
+	elif arg == '-u' or arg == '--with-usb': usb_flag=True
 	elif arg == '-b' or arg == '--with-bluetooth': bluetooth_flag=True
 	elif arg == '-d' or arg == '--with-avahi': avahi_flag=True
 	elif arg == '-l' or arg == '--with-rwlock': rwlock_flag=True
@@ -219,6 +230,7 @@ cmake_args=target_class.cmake_arg_qt(qt_flag)
 cmake_args+=target_class.cmake_arg_debug(debug_flag)
 cmake_args+=target_class.cmake_arg_shared(shared_flag)
 cmake_args+=target_class.cmake_arg_media(media_flag)
+cmake_args+=target_class.cmake_arg_usb(usb_flag)
 cmake_args+=target_class.cmake_arg_bluetooth(bluetooth_flag)
 cmake_args+=target_class.cmake_arg_avahi(avahi_flag)
 cmake_args+=target_class.cmake_arg_rwlock(rwlock_flag)
