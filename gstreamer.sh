@@ -5,6 +5,7 @@ GSTREAMER_SRC_REPO_LINK="deb-src http://ppa.launchpad.net/gstreamer-developers/p
 FULL_GSTREAMER_REPO_LINK="$GSTREAMER_REPO_LINK $DISTRIB_CODENAME main"
 FULL_GSTREAMER_SRC_REPO_LINK="$GSTREAMER_SRC_REPO_LINK $DISTRIB_CODENAME main"
 GSTREAMER="gstreamer1.0*"
+UPDATE_SOURCES=false
 
 if ! grep --quiet "$FULL_GSTREAMER_REPO_LINK" /etc/apt/sources.list; then
 	echo "Adding gstreamer repo to /etc/apt/sources.list"
@@ -18,7 +19,7 @@ if ! grep --quiet "$FULL_GSTREAMER_SRC_REPO_LINK" /etc/apt/sources.list; then
 	UPDATE_SOURCES=true
 fi
 
-if $UPDATE_SOURCES; then
+if test $UPDATE_SOURCES == true; then
 	echo "Updating repositories"
 	sudo apt-get update
 fi
