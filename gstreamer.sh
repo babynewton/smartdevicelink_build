@@ -19,10 +19,11 @@ if ! grep --quiet "$FULL_GSTREAMER_SRC_REPO_LINK" /etc/apt/sources.list; then
 	UPDATE_SOURCES=true
 fi
 
-if test $UPDATE_SOURCES == true; then
+echo source=$UPDATE_SOURCES
+if $UPDATE_SOURCES == "true"; then
 	echo "Updating repositories"
 	sudo apt-get update
 fi
 
 echo "installing gstreamer"
-sudo apt-get install ${GSTREAMER}
+test ! -d /usr/include/gstreamer-1.0 && sudo apt-get install ${GSTREAMER}
