@@ -3,6 +3,13 @@ CMAKE_OPTION=@cmake_option@
 CMAKE=cmake
 CORES=@cores@
 CMAKE_PATH=@cmake_path@
+ARCH=$(shell dpkg-architecture -qDEB_HOST_ARCH)
+OS_NAME=$(shell grep DISTRIB_ID /etc/lsb-release | sed 's/DISTRIB_ID=//')
+OS_VERSION=$(shell grep DISTRIB_RELEASE /etc/lsb-release | sed 's/DISTRIB_RELEASE=//')
+PACKAGE_MNEMONIC=@package_mnemonic@
+PACKAGE_VERSION=@package_version@
+PACKAGE_NAME=$(PACKAGE_MNYMONIC)-v$(PACKAGE_VERSION)-$(OS_NAME)-$(OS_VERSION)-$(ARCH)
+PACKAGE_DEPENDS="@depends@"
 
 all doxygen: $(RELEASE)/Makefile
 	$(MAKE) -C $(RELEASE) $@ -j$(CORES)
@@ -19,8 +26,16 @@ $(RELEASE):
 
 clean:
 	$(MAKE) -C $(RELEASE) $@ -j$(CORES)
+	$(MAKE) -C debian $@
 
 distclean:
 	rm -rf $(RELEASE)
 	rm -f Makefile
 	find . -name "*~" -exec rm {} \;
+
+deb:
+	$(MAKE) -C debian PACKAGE=$(PACKAGE_NAME)\
+			ARCH=$(ARCH)\
+			PACKAGE_MNEMONIC=$(PACKAGE_MNEMONIC)\
+			PACKAGE_VERSION=$(PACKAGE_VERSION)\
+			PACKAGE_DEPENDS=$(PACKAGE_DEPENDS)

@@ -1,0 +1,10 @@
+Package: @package@
+Version: @version@
+Section: utils
+Priority: optional
+Architecture: @arch@
+Installed-Size: @size@
+Depends: @depends@
+Maintainer: Newton Kim <babynewton@gmail.google.com>
+Description: smart device link
+ SDL stands for Smart Device Link. Free open source connectivity software
