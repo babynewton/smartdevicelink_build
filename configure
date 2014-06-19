@@ -105,19 +105,18 @@ class cl_core(cl_base):
 		parent.check_and_install('mscgen')
 		parent.check_pkg_and_install('dbus-1', 'libdbus-1-dev')
 		parent.check_pkg_and_install('libpulse', 'libpulse-dev')
+		parent.check_dir_and_install('/usr/include/libudev.h', 'libudev-dev')
+		self.install_gstreamer_sdk()
 		os_ver=parent.os_version()
 		if os_ver == "12.04":
 			parent.check_dir_and_install('/usr/include/log4cxx', 'liblog4cxx10-dev')
-			self.install_gstreamer_sdk()
 			self.install_cmake()
 		elif os_ver == "12.10" or os_ver == "13.04":
 			parent.check_dir_and_install('/usr/include/log4cxx', 'liblog4cxx-dev')
-			self.install_gstreamer_sdk()
 		else:
 			parent.check_dir_and_install('/usr/include/log4cxx', 'liblog4cxx-dev')
 #			parent.check_pkg_and_install('gstreamer-0.10', 'libgstreamer0.10-dev')
 #			parent.check_dir_and_install('/usr/share/doc/gstreamer0.10-ffmpeg', 'gstreamer0.10-ffmpeg')
-			self.install_gstreamer_sdk()
 
 	def mnemonic(self): return "sdl"
 

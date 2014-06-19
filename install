@@ -1,0 +1,37 @@
+#!/bin/bash
+
+RELEASE=$1
+MNEMONIC=$2
+DIST_DIR=$3
+
+EXECUTABLE=$DIST_DIR/usr/bin/$MNEMONIC
+
+install -d $DIST_DIR/usr/bin
+install -d $DIST_DIR/usr/lib/
+install -d $DIST_DIR/usr/lib/$MNEMONIC
+
+for DIR in bin lib
+do
+	install -d $DIST_DIR/usr/lib/$MNEMONIC/$DIR
+	for FILE in `ls $RELEASE/$DIR`
+	do
+		DESC=`file $RELEASE/$DIR/$FILE`
+		EXEC=`echo $DESC | grep executable`
+		LIBS=`echo $DESC | grep "shared object"`
+		if [ ! -z $EXEC -o ! -z $LIBS ]
+		then
+			MODE=755
+			STRIP=-s
+		else
+			MODE=644
+			STRIP=
+		fi
+		install $STRIP -m $MODE $RELEASE/$DIR/$FILE $DIST_DIR/usr/lib/$MNEMONIC/$DIR
+	done
+done
+
+echo "#!/bin/bash" > $EXECUTABLE
+echo "export LD_LIBRARY_PATH=/usr/lib/$MNEMONIC:$LD_LIBRARY_PATH" >> $EXECUTABLE
+echo "cd /usr/lib/$MNEMONIC; ./smartDeviceLinkCore; cd -" >> $EXECUTABLE
+
+chmod 755 $EXECUTABLE

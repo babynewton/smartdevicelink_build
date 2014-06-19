@@ -8,14 +8,14 @@ OS_NAME=$(shell grep DISTRIB_ID /etc/lsb-release | sed 's/DISTRIB_ID=//')
 OS_VERSION=$(shell grep DISTRIB_RELEASE /etc/lsb-release | sed 's/DISTRIB_RELEASE=//')
 PACKAGE_MNEMONIC=@package_mnemonic@
 PACKAGE_VERSION=@package_version@
-PACKAGE_NAME=$(PACKAGE_MNYMONIC)-v$(PACKAGE_VERSION)-$(OS_NAME)-$(OS_VERSION)-$(ARCH)
+PACKAGE_NAME=$(PACKAGE_MNEMONIC)-v$(PACKAGE_VERSION)-$(OS_NAME)-$(OS_VERSION)-$(ARCH)
 PACKAGE_DEPENDS="@depends@"
 
 all doxygen: $(RELEASE)/Makefile
 	$(MAKE) -C $(RELEASE) $@ -j$(CORES)
 
 install:
-	$(MAKE) -C $(RELEASE) install
+	$(MAKE) -C $(RELEASE) $@
 	cp sdld $(RELEASE)/bin
 
 $(RELEASE)/Makefile: $(RELEASE)
@@ -27,6 +27,7 @@ $(RELEASE):
 clean:
 	$(MAKE) -C $(RELEASE) $@ -j$(CORES)
 	$(MAKE) -C debian $@
+	rm -rf dist_deb
 
 distclean:
 	rm -rf $(RELEASE)
@@ -34,8 +35,11 @@ distclean:
 	find . -name "*~" -exec rm {} \;
 
 deb:
-	$(MAKE) -C debian PACKAGE=$(PACKAGE_NAME)\
-			ARCH=$(ARCH)\
-			PACKAGE_MNEMONIC=$(PACKAGE_MNEMONIC)\
-			PACKAGE_VERSION=$(PACKAGE_VERSION)\
-			PACKAGE_DEPENDS=$(PACKAGE_DEPENDS)
+	./install $(RELEASE) $(PACKAGE_MNEMONIC) dist_deb
+	$(MAKE) -C debian\
+		PACKAGE=../$(PACKAGE_NAME)\
+		ARCH=$(ARCH)\
+		PACKAGE_MNEMONIC=$(PACKAGE_MNEMONIC)\
+		PACKAGE_VERSION=$(PACKAGE_VERSION)\
+		PACKAGE_DEPENDS=$(PACKAGE_DEPENDS)\
+		DIST_DIR=../dist_deb
